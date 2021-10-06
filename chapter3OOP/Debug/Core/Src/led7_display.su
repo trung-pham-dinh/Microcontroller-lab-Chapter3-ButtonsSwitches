@@ -1,0 +1,2 @@
+led7_display.c:24:6:init_led7	24	static
+led7_display.c:32:6:display_7SEG	32	static

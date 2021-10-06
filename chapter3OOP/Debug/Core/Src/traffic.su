@@ -1,0 +1,2 @@
+traffic.c:41:6:init_traffic	16	static
+traffic.c:52:6:traffic_display	8	static
