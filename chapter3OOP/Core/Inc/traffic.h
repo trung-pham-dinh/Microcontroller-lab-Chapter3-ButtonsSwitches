@@ -31,5 +31,6 @@ void init_traffic(const uint16_t* port, uint8_t* time);
 void traffic_display(void);
 void clearTraffic(void);
 uint8_t isPeriodDone(void);
+void startNewPeriod(void);
 
 #endif /* INC_TRAFFIC_H_ */

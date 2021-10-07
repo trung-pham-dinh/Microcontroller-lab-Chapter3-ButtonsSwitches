@@ -232,6 +232,13 @@ int main(void)
 	  }
 	  scanLed7();
 	  blinkTraffic(trafficMode);
+	  if(isPeriodDone()) {
+		  if(updateFlag) {
+			  updateFlag = 0;
+			  copyArray(traffic_time_update, traffic_time, 6);
+		  }
+		  startNewPeriod();
+	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

@@ -24,6 +24,7 @@ static uint8_t* lightTime;
 
 static uint16_t allpin;
 static uint8_t readyForNewPeriod = 1;
+static uint8_t periodDone = 0;
 
 void init_traffic(const uint16_t* port, uint8_t* time) {
 	lightPort = port;
@@ -60,16 +61,20 @@ void traffic_display(void) {
 		break;
 	case STATE_YELLOW:
 		if(getSecFlag(TRAFFIC_VER_TIMER)) {
-			setSecTimer(TRAFFIC_VER_TIMER, lightTime[VER_RED]);
-			ver_state = STATE_RED;
+			ver_state = STATE_WAIT;
 
-			clearTraffic();
 			readyForNewPeriod = 0;
-			break;
+			periodDone = 1;
+			clearTraffic();
 		}
 		HAL_GPIO_WritePin(TRAFFIC_PORT, lightPort[VER_YELLOW], LIGHT_SET);
 		break;
 	case STATE_WAIT:
+		if(readyForNewPeriod) {
+			periodDone = 0;
+			ver_state = STATE_RED;
+			setSecTimer(TRAFFIC_VER_TIMER, lightTime[VER_RED]);
+		}
 		break;
 	}
 
@@ -98,16 +103,21 @@ void traffic_display(void) {
 		break;
 	case STATE_RED:
 		if(getSecFlag(TRAFFIC_HOR_TIMER)) {
-			setSecTimer(TRAFFIC_HOR_TIMER, lightTime[HOR_GREEN]);
-			hor_state = STATE_GREEN;
+			hor_state = STATE_WAIT;
 
 			readyForNewPeriod = 0;
+			periodDone = 1;
 			clearTraffic();
 			break;
 		}
 		HAL_GPIO_WritePin(TRAFFIC_PORT, lightPort[HOR_RED], LIGHT_SET);
 		break;
 	case STATE_WAIT:
+		if(readyForNewPeriod) {
+			periodDone = 0;
+			hor_state = STATE_GREEN;
+			setSecTimer(TRAFFIC_HOR_TIMER, lightTime[HOR_GREEN]);
+		}
 		break;
 	}
 
@@ -116,4 +126,11 @@ void traffic_display(void) {
 void clearTraffic(void) {
 	HAL_GPIO_WritePin(TRAFFIC_PORT, lightPort[VER_YELLOW], LIGHT_RESET);
 	HAL_GPIO_WritePin(TRAFFIC_PORT, allpin, LIGHT_RESET);
+}
+
+uint8_t isPeriodDone(void) {
+	return periodDone;
+}
+void startNewPeriod(void) {
+	readyForNewPeriod = 1;
 }
