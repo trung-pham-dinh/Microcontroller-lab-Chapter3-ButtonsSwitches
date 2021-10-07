@@ -20,6 +20,7 @@ static const uint16_t* seg7Port;
 static const uint16_t* seg7En;
 
 static uint8_t* seg7Val;
+static uint16_t allseg;
 
 void init_led7(const uint16_t* en, const uint16_t* port, uint8_t* buffer, unsigned int no_led7) {
 	NO_OF_LED7 = no_led7;
@@ -27,10 +28,11 @@ void init_led7(const uint16_t* en, const uint16_t* port, uint8_t* buffer, unsign
 	seg7En = en;
 	seg7Port = port;
 	seg7Val = buffer;
+	allseg = seg7Port[0] | seg7Port[1] | seg7Port[2] | seg7Port[3] | seg7Port[4] | seg7Port[5] | seg7Port[6];
 }
 
 void display_7SEG(unsigned int index) {
-	HAL_GPIO_WritePin(SEG_PORT, seg7Port[0] | seg7Port[1] | seg7Port[2] | seg7Port[3] | seg7Port[4] | seg7Port[5] | seg7Port[6], RESET_SEG);
+	HAL_GPIO_WritePin(SEG_PORT, allseg, RESET_SEG);
 
 	uint8_t hexcode = seg7Hex[seg7Val[index]];
 	for(int i = 0; i < 7; i++) {

@@ -1,0 +1,7 @@
+
++ vẫn chạy bth khi đổi period và prescaler
++ Không sử dụng extern, chỉ xài hàm để set giá trị -> data hiding
++ cấp phát động cho timer, button, led7(sử dụng malloc) -> có thể mở rộng project
++ Check lỗi (sai thì exit(-1))
++ Sử dụng enum, macro để dễ dàng thay đổi cấu hình và dễ đọc code.
++ Có thể dừng timer
