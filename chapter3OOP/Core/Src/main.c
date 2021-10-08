@@ -147,8 +147,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
-	  fsm_for_input_processing();
 	  switch(trafficMode) {
 	  case NORMAL:
 		  if(getPressFlag(BUTTON_MODE)) {
@@ -164,58 +162,20 @@ int main(void)
 		  setBufferLed7(getSecCounter(TRAFFIC_VER_TIMER), getSecCounter(TRAFFIC_HOR_TIMER));
 		  break;
 	  case CHANGE_RED:
-		  if(getPressFlag(BUTTON_MODE)) {
-			  resetPressFlag(BUTTON_MODE);
-			  trafficMode = CHANGE_YELLOW;
-			  clearTraffic();
-
-			  if(updateFlag == 0) {
-				  copyArray(traffic_time, traffic_time_update, 6); // update buffer -> current buffer
-			  }
-			  break;
-		  }
-		  if(getPressFlag(BUTTON_VALUE)) {
-			  resetPressFlag(BUTTON_VALUE) ;
-			  increase(trafficMode, traffic_time_update);
-		  }
-		  if(getPressFlag(BUTTON_SET)) {
-			  resetPressFlag(BUTTON_SET);
-			  updateFlag = 1;
-		  }
-		  setBufferLed7(traffic_time_update[VER_RED], trafficMode);
-		  break;
 	  case CHANGE_YELLOW:
-		  if(getPressFlag(BUTTON_MODE)) {
-			  resetPressFlag(BUTTON_MODE);
-			  trafficMode = CHANGE_GREEN;
-			  clearTraffic();
-
-			  if(updateFlag == 0) {
-				  copyArray(traffic_time, traffic_time_update, 6); // update buffer -> current buffer
-			  }
-			  break;
-		  }
-		  if(getPressFlag(BUTTON_VALUE)) {
-			  resetPressFlag(BUTTON_VALUE) ;
-			  increase(trafficMode, traffic_time_update);
-		  }
-		  if(getPressFlag(BUTTON_SET)) {
-			  resetPressFlag(BUTTON_SET);
-			  updateFlag = 1;
-		  }
-		  setBufferLed7(traffic_time_update[VER_YELLOW], trafficMode);
-		  break;
 	  case CHANGE_GREEN:
 		  if(getPressFlag(BUTTON_MODE)) {
 			  resetPressFlag(BUTTON_MODE);
-			  trafficMode = NORMAL;
+			  trafficMode = (trafficMode == CHANGE_GREEN)? NORMAL : trafficMode+1;
 			  clearTraffic();
-
-			  controlSecTimer(TRAFFIC_VER_TIMER, START_TIMER);
-			  controlSecTimer(TRAFFIC_HOR_TIMER, START_TIMER);
 
 			  if(updateFlag == 0) {
 				  copyArray(traffic_time, traffic_time_update, 6); // update buffer -> current buffer
+			  }
+
+			  if(trafficMode == CHANGE_GREEN) {
+				  controlSecTimer(TRAFFIC_VER_TIMER, START_TIMER);
+				  controlSecTimer(TRAFFIC_HOR_TIMER, START_TIMER);
 			  }
 			  break;
 		  }
@@ -227,9 +187,12 @@ int main(void)
 			  resetPressFlag(BUTTON_SET);
 			  updateFlag = 1;
 		  }
-		  setBufferLed7(traffic_time_update[VER_GREEN], trafficMode);
-		  break;
+		  if(trafficMode == CHANGE_RED) setBufferLed7(traffic_time_update[VER_RED], trafficMode);
+		  else if(trafficMode == CHANGE_YELLOW) setBufferLed7(traffic_time_update[VER_YELLOW], trafficMode);
+		  else if(trafficMode == CHANGE_GREEN) setBufferLed7(traffic_time_update[VER_GREEN], trafficMode);
 	  }
+
+	  fsm_for_input_processing();
 	  scanLed7();
 	  blinkTraffic(trafficMode);
 	  if(isPeriodDone()) {
