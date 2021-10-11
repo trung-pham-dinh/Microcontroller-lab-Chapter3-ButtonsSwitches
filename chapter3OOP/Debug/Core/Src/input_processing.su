@@ -1,4 +1,4 @@
-input_processing.c:16:6:init_fsm_input_processing	24	static
-input_processing.c:27:6:fsm_for_input_processing	16	static
-input_processing.c:45:9:getPressFlag	16	static
-input_processing.c:48:6:resetPressFlag	16	static
+input_processing.c:24:6:init_fsm_input_processing	24	static
+input_processing.c:44:6:fsm_for_input_processing	16	static
+input_processing.c:70:9:getPressFlag	16	static
+input_processing.c:81:6:resetPressFlag	16	static
