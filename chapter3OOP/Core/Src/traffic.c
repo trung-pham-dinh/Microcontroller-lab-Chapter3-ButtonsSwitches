@@ -91,6 +91,7 @@ void traffic_display(void) {
 			readyForNewPeriod = 0;
 			periodDone = 1;
 			clearTraffic();
+			break;
 		}
 		HAL_GPIO_WritePin(TRAFFIC_PORT, lightPort[VER_YELLOW], LIGHT_SET);
 		break;
