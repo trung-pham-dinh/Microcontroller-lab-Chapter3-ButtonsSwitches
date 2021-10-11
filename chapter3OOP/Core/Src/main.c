@@ -36,7 +36,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define NO_OF_LED7 		4
-#define NO_OF_BUTTONS   3
+#define NO_OF_BUTTONS   4
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -67,10 +67,11 @@ uint8_t buffer_led7[NO_OF_LED7] = {0,1,2,4};
 // button parameter
 typedef enum {
 	BUTTON_MODE,
-	BUTTON_VALUE,
+	BUTTON_INCREASE,
+	BUTTON_DECREASE,
 	BUTTON_SET
 } ButtonArrayAccess;
-const uint16_t button_port[NO_OF_BUTTONS] = {BUTTON_MODE_PORT, BUTTON_VALUE_PORT, BUTTON_SET_PORT};
+const uint16_t button_port[NO_OF_BUTTONS] = {BUTTON_MODE_PORT, BUTTON_INCREASE_PORT, BUTTON_DECREASE_PORT, BUTTON_SET_PORT};
 
 // traffic parameter
 typedef enum {
@@ -97,6 +98,7 @@ void scanLed7(void);
 void blinkTraffic(ModeState state);
 void setBufferLed7(uint8_t firstPair, uint8_t secondPair);
 void increase(ModeState state, uint8_t* buffer);
+void decrease(ModeState state, uint8_t* buffer);
 void copyArray(uint8_t* from, uint8_t* to, int n);
 /* USER CODE END PFP */
 
@@ -179,9 +181,13 @@ int main(void)
 			  }
 			  break;
 		  }
-		  if(getPressFlag(BUTTON_VALUE)) {
-			  resetPressFlag(BUTTON_VALUE) ;
+		  if(getPressFlag(BUTTON_INCREASE)) {
+			  resetPressFlag(BUTTON_INCREASE) ;
 			  increase(trafficMode, traffic_time_update);
+		  }
+		  if(getPressFlag(BUTTON_DECREASE)) {
+			  resetPressFlag(BUTTON_DECREASE) ;
+			  decrease(trafficMode, traffic_time_update);
 		  }
 		  if(getPressFlag(BUTTON_SET)) {
 			  resetPressFlag(BUTTON_SET);
@@ -331,8 +337,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PA10 PA11 PA12 */
-  GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12;
+  /*Configure GPIO pins : PA10 PA11 PA12 PA13 */
+  GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -363,10 +369,14 @@ void blinkTraffic(ModeState state) {
 		HAL_GPIO_TogglePin(TRAFFIC_PORT, (RED_VER << (state-1)) | (RED_HOR << (state-1)));
 	}
 }
+//			RV          GV    YV
+//	|-----------------|------|---|
+//	|------------|----|----------|
+//        GH       YH      RH
 void increase(ModeState state, uint8_t* buffer) {
 	switch(state) {
 	case CHANGE_RED:
-		if(buffer[VER_GREEN]-1 > 0 && buffer[HOR_RED]-1 > 0) {
+		if(buffer[VER_GREEN]-1 > 0 && buffer[HOR_RED]-1 > 1) {
 			buffer[VER_RED]++;
 			buffer[VER_GREEN]--;
 
@@ -375,7 +385,7 @@ void increase(ModeState state, uint8_t* buffer) {
 		}
 		break;
 	case CHANGE_GREEN:
-		if(buffer[VER_RED]-1 > 0 && buffer[HOR_GREEN]-1 > 0) {
+		if(buffer[VER_RED]-1 > 1 && buffer[HOR_GREEN]-1 > 0) {
 			buffer[VER_GREEN]++;
 			buffer[VER_RED]--;
 
@@ -387,6 +397,40 @@ void increase(ModeState state, uint8_t* buffer) {
 		if(buffer[VER_GREEN]-1 > 0) {
 			buffer[VER_YELLOW]++;
 			buffer[VER_GREEN]--;
+		}
+		break;
+	default:
+		break;
+	}
+}
+//			RV          GV    YV
+//	|-----------------|------|---|
+//	|------------|----|----------|
+//        GH       YH      RH
+void decrease(ModeState state, uint8_t* buffer) {
+	switch(state) {
+	case CHANGE_RED:
+		if(buffer[VER_RED]-1 > 1 && buffer[VER_GREEN]-1 > 0) {
+			buffer[VER_RED]--;
+			buffer[VER_GREEN]++;
+
+			buffer[HOR_RED]++;
+			buffer[HOR_GREEN]--;
+		}
+		break;
+	case CHANGE_GREEN:
+		if(buffer[VER_GREEN]-1 > 0 && buffer[HOR_RED]-1 > 1) {
+			buffer[VER_GREEN]--;
+			buffer[VER_RED]++;
+
+			buffer[HOR_GREEN]++;
+			buffer[HOR_RED]--;
+		}
+		break;
+	case CHANGE_YELLOW:
+		if(buffer[VER_YELLOW]-1 > 0) {
+			buffer[VER_YELLOW]--;
+			buffer[VER_GREEN]++;
 		}
 		break;
 	default:
