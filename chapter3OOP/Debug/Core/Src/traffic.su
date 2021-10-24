@@ -1,5 +1,5 @@
-traffic.c:45:6:init_traffic	16	static
+traffic.c:44:6:init_traffic	24	static
 traffic.c:65:6:traffic_display	8	static
-traffic.c:160:6:clearTraffic	8	static
-traffic.c:172:9:isPeriodDone	4	static
-traffic.c:184:6:startNewPeriod	4	static
+traffic.c:158:6:clearTraffic	8	static
+traffic.c:170:9:getUpdateFlag	4	static
+traffic.c:177:6:updateNextPeriod	4	static

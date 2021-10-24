@@ -11,9 +11,6 @@
 #include "main.h"
 #include <stdlib.h>
 
-extern unsigned int NO_OF_BUTTONS;
-extern const uint16_t* buttonPort;
-
 void init_button_reading(const uint16_t* port, unsigned int no_buttons);
 void button_reading(void);
 unsigned char is_button_pressed(uint8_t index);

@@ -1,4 +1,9 @@
-input_processing.c:24:6:init_fsm_input_processing	24	static
-input_processing.c:44:6:fsm_for_input_processing	16	static
-input_processing.c:70:9:getPressFlag	16	static
-input_processing.c:81:6:resetPressFlag	16	static
+input_processing.c:66:6:init_fsm_input_processing	24	static
+input_processing.c:92:6:fsm_for_input_processing	16	static
+input_processing.c:110:6:fsm_for_traffic_control	16	static
+input_processing.c:136:6:process	16	static
+input_processing.c:184:6:setBufferLed7	16	static
+input_processing.c:191:6:scanLed7	8	static
+input_processing.c:205:6:increase	16	static
+input_processing.c:236:6:decrease	16	static
+input_processing.c:268:6:blinkTraffic	8	static

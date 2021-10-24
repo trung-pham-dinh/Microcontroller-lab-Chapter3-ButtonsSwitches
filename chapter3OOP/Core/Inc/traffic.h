@@ -11,6 +11,7 @@
 #include "main.h"
 #include <stdlib.h>
 #include "timer.h"
+#include "functionality.h"
 
 typedef enum {
 	VER_RED,
@@ -27,10 +28,10 @@ typedef enum {
 	TRAFFIC_HOR_TIMER
 } TimerSecArrayAccess;
 
-void init_traffic(const uint16_t* port, uint8_t* time);
+void init_traffic(const uint16_t* port, uint8_t* time, uint8_t* timeUpdate);
 void traffic_display(void);
 void clearTraffic(void);
-uint8_t isPeriodDone(void);
-void startNewPeriod(void);
+uint8_t getUpdateFlag(void);
+void updateNextPeriod(void);
 
 #endif /* INC_TRAFFIC_H_ */

@@ -22,10 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "timer.h"
-#include "led7_display.h"
 #include "input_processing.h"
-#include "traffic.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -35,8 +32,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define NO_OF_LED7 		4
-#define NO_OF_BUTTONS   4
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -50,41 +46,16 @@ TIM_HandleTypeDef htim2;
 /* USER CODE BEGIN PV */
 
 // timer parameter
-typedef enum {
-	SCAN_TIMER,
-	BLINK_TIMER
-} TimerMilArrayAccess;
-const unsigned int NO_OF_MIL_TIMERS = 2;
-const unsigned int NO_OF_SEC_TIMERS = 2;
-const unsigned int scanTime = 250;
-const unsigned int blinkTime = 500;
+
 
 // led7 parameter
-const uint16_t seg7_port[7] = {SEG_0, SEG_1, SEG_2, SEG_3, SEG_4, SEG_5, SEG_6};
-const uint16_t seg7_en[NO_OF_LED7] = {EN_SEG_0, EN_SEG_1, EN_SEG_2, EN_SEG_3};
-uint8_t buffer_led7[NO_OF_LED7] = {0,1,2,4};
+
 
 // button parameter
-typedef enum {
-	BUTTON_MODE,
-	BUTTON_INCREASE,
-	BUTTON_DECREASE,
-	BUTTON_SET
-} ButtonArrayAccess;
-const uint16_t button_port[NO_OF_BUTTONS] = {BUTTON_MODE_PORT, BUTTON_INCREASE_PORT, BUTTON_DECREASE_PORT, BUTTON_SET_PORT};
+
 
 // traffic parameter
-typedef enum {
-	NORMAL,
-	CHANGE_RED,
-	CHANGE_YELLOW,
-	CHANGE_GREEN
-} ModeState;
-ModeState trafficMode = NORMAL;
-const uint16_t traffic_port[6] = {RED_VER, GREEN_VER, YELLOW_VER, RED_HOR, GREEN_HOR, YELLOW_HOR};
-uint8_t traffic_time[6] = {9,6,3,9,6,3};
-uint8_t traffic_time_update[6] = {9,6,3,9,6,3};
-uint8_t updateFlag = 0;
+
 
 
 /* USER CODE END PV */
@@ -94,12 +65,14 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
-void scanLed7(void);
-void blinkTraffic(ModeState state);
-void setBufferLed7(uint8_t firstPair, uint8_t secondPair);
-void increase(ModeState state, uint8_t* buffer);
-void decrease(ModeState state, uint8_t* buffer);
-void copyArray(uint8_t* from, uint8_t* to, int n);
+//void scanLed7(void);
+
+//void setBufferLed7(uint8_t firstPair, uint8_t secondPair);
+
+//void blinkTraffic(ModeState state);
+//void increase(ModeState state, uint8_t* buffer);
+//void decrease(ModeState state, uint8_t* buffer);
+//void copyArray(uint8_t* from, uint8_t* to, int n);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -139,75 +112,67 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim2);
 
-  init_timer(&htim2, NO_OF_SEC_TIMERS, NO_OF_MIL_TIMERS);
-  init_led7(seg7_en, seg7_port, buffer_led7, NO_OF_LED7);
-  init_fsm_input_processing(button_port, NO_OF_BUTTONS);
-  init_traffic(traffic_port, traffic_time);
+  init_fsm_input_processing(&htim2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  switch(trafficMode) {
-	  case NORMAL:
-		  if(getPressFlag(BUTTON_MODE)) {
-			  resetPressFlag(BUTTON_MODE);
-			  trafficMode = CHANGE_RED;
-			  clearTraffic();
-
-			  controlSecTimer(TRAFFIC_VER_TIMER, STOP_TIMER);
-			  controlSecTimer(TRAFFIC_HOR_TIMER, STOP_TIMER);
-			  break;
-		  }
-		  traffic_display();
-		  setBufferLed7(getSecCounter(TRAFFIC_VER_TIMER), getSecCounter(TRAFFIC_HOR_TIMER));
-		  break;
-	  case CHANGE_RED:
-	  case CHANGE_YELLOW:
-	  case CHANGE_GREEN:
-		  if(getPressFlag(BUTTON_MODE)) {
-			  resetPressFlag(BUTTON_MODE);
-			  trafficMode = (trafficMode == CHANGE_GREEN)? NORMAL : trafficMode+1;
-			  clearTraffic();
-
-			  if(updateFlag == 0) {
-				  copyArray(traffic_time, traffic_time_update, 6); // update buffer -> current buffer
-			  }
-
-			  if(trafficMode == CHANGE_GREEN) {
-				  controlSecTimer(TRAFFIC_VER_TIMER, START_TIMER);
-				  controlSecTimer(TRAFFIC_HOR_TIMER, START_TIMER);
-			  }
-			  break;
-		  }
-		  if(getPressFlag(BUTTON_INCREASE)) {
-			  resetPressFlag(BUTTON_INCREASE) ;
-			  increase(trafficMode, traffic_time_update);
-		  }
-		  if(getPressFlag(BUTTON_DECREASE)) {
-			  resetPressFlag(BUTTON_DECREASE) ;
-			  decrease(trafficMode, traffic_time_update);
-		  }
-		  if(getPressFlag(BUTTON_SET)) {
-			  resetPressFlag(BUTTON_SET);
-			  updateFlag = 1;
-		  }
-		  if(trafficMode == CHANGE_RED) setBufferLed7(traffic_time_update[VER_RED], trafficMode);
-		  else if(trafficMode == CHANGE_YELLOW) setBufferLed7(traffic_time_update[VER_YELLOW], trafficMode);
-		  else if(trafficMode == CHANGE_GREEN) setBufferLed7(traffic_time_update[VER_GREEN], trafficMode);
-	  }
-
+//	  switch(trafficMode) {
+//	  case NORMAL:
+//		  if(getPressFlag(BUTTON_MODE)) {
+//			  resetPressFlag(BUTTON_MODE);
+//			  trafficMode = CHANGE_RED;
+//			  clearTraffic();
+//			  resetPressAllFlag();
+//
+//			  controlSecTimer(TRAFFIC_VER_TIMER, STOP_TIMER);
+//			  controlSecTimer(TRAFFIC_HOR_TIMER, STOP_TIMER);
+//			  break;
+//		  }
+//		  traffic_display();
+//		  setBufferLed7(getSecCounter(TRAFFIC_VER_TIMER), getSecCounter(TRAFFIC_HOR_TIMER));
+//		  break;
+//	  case CHANGE_RED:
+//	  case CHANGE_YELLOW:
+//	  case CHANGE_GREEN:
+//		  if(getPressFlag(BUTTON_MODE)) {
+//			  resetPressFlag(BUTTON_MODE);
+//			  trafficMode = (trafficMode == CHANGE_GREEN)? NORMAL : trafficMode+1;
+//			  clearTraffic();
+//
+//			  if(updateFlag == 0) {
+//				  copyArray(traffic_time, traffic_time_update, 6); // update buffer -> current buffer
+//			  }
+//
+//			  if(trafficMode == CHANGE_GREEN) {
+//				  controlSecTimer(TRAFFIC_VER_TIMER, START_TIMER);
+//				  controlSecTimer(TRAFFIC_HOR_TIMER, START_TIMER);
+//			  }
+//			  break;
+//		  }
+//		  if(getPressFlag(BUTTON_INCREASE)) {
+//			  resetPressFlag(BUTTON_INCREASE) ;
+//			  increase(trafficMode, traffic_time_update);
+//		  }
+//		  if(getPressFlag(BUTTON_DECREASE)) {
+//			  resetPressFlag(BUTTON_DECREASE) ;
+//			  decrease(trafficMode, traffic_time_update);
+//		  }
+//		  if(getPressFlag(BUTTON_SET)) {
+//			  resetPressFlag(BUTTON_SET);
+//			  updateFlag = 1;
+//		  }
+//		  if(trafficMode == CHANGE_RED) setBufferLed7(traffic_time_update[VER_RED], trafficMode);
+//		  else if(trafficMode == CHANGE_YELLOW) setBufferLed7(traffic_time_update[VER_YELLOW], trafficMode);
+//		  else if(trafficMode == CHANGE_GREEN) setBufferLed7(traffic_time_update[VER_GREEN], trafficMode);
+//	  }
 	  fsm_for_input_processing();
-	  scanLed7();
-	  blinkTraffic(trafficMode);
-	  if(isPeriodDone()) {
-		  if(updateFlag) {
-			  updateFlag = 0;
-			  copyArray(traffic_time_update, traffic_time, 6);
-		  }
-		  startNewPeriod();
-	  }
+	  fsm_for_traffic_control();
+
+//	  scanLed7();
+//	  blinkTraffic(trafficMode);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -346,102 +311,102 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void scanLed7() {
-	static uint8_t index = 0;
+//void scanLed7() {
+//	static uint8_t index = 0;
+//
+//	if(getMilFlag(SCAN_TIMER)) {
+//		setMilTimer(SCAN_TIMER, scanTime);
+//		display_7SEG(index++);
+//		if(index == 4) index = 0;
+//	}
+//}
+//void setBufferLed7(uint8_t firstPair, uint8_t secondPair) {
+//	buffer_led7[0] = firstPair / 10;
+//	buffer_led7[1] = firstPair % 10;
+//	buffer_led7[2] = secondPair / 10;
+//	buffer_led7[3] = secondPair % 10;
+//}
 
-	if(getMilFlag(SCAN_TIMER)) {
-		setMilTimer(SCAN_TIMER, scanTime);
-		display_7SEG(index++);
-		if(index == 4) index = 0;
-	}
-}
-void setBufferLed7(uint8_t firstPair, uint8_t secondPair) {
-	buffer_led7[0] = firstPair / 10;
-	buffer_led7[1] = firstPair % 10;
-	buffer_led7[2] = secondPair / 10;
-	buffer_led7[3] = secondPair % 10;
-}
-
-void blinkTraffic(ModeState state) {
-	if(state == NORMAL) return;
-	if(getMilFlag(BLINK_TIMER)) {
-		setMilTimer(BLINK_TIMER, blinkTime);
-		HAL_GPIO_TogglePin(TRAFFIC_PORT, (RED_VER << (state-1)) | (RED_HOR << (state-1)));
-	}
-}
+//void blinkTraffic(ModeState state) {
+//	if(state == NORMAL) return;
+//	if(getMilFlag(BLINK_TIMER)) {
+//		setMilTimer(BLINK_TIMER, blinkTime);
+//		HAL_GPIO_TogglePin(TRAFFIC_PORT, (RED_VER << (state-1)) | (RED_HOR << (state-1)));
+//	}
+//}
 //			RV          GV    YV
 //	|-----------------|------|---|
 //	|------------|----|----------|
 //        GH       YH      RH
-void increase(ModeState state, uint8_t* buffer) {
-	switch(state) {
-	case CHANGE_RED:
-		if(buffer[VER_GREEN]-1 > 0 && buffer[HOR_RED]-1 > 1) {
-			buffer[VER_RED]++;
-			buffer[VER_GREEN]--;
-
-			buffer[HOR_RED]--;
-			buffer[HOR_GREEN]++;
-		}
-		break;
-	case CHANGE_GREEN:
-		if(buffer[VER_RED]-1 > 1 && buffer[HOR_GREEN]-1 > 0) {
-			buffer[VER_GREEN]++;
-			buffer[VER_RED]--;
-
-			buffer[HOR_GREEN]--;
-			buffer[HOR_RED]++;
-		}
-		break;
-	case CHANGE_YELLOW:
-		if(buffer[VER_GREEN]-1 > 0) {
-			buffer[VER_YELLOW]++;
-			buffer[VER_GREEN]--;
-		}
-		break;
-	default:
-		break;
-	}
-}
+//void increase(ModeState state, uint8_t* buffer) {
+//	switch(state) {
+//	case CHANGE_RED:
+//		if(buffer[VER_GREEN]-1 > 0 && buffer[HOR_RED]-1 > 1) {
+//			buffer[VER_RED]++;
+//			buffer[VER_GREEN]--;
+//
+//			buffer[HOR_RED]--;
+//			buffer[HOR_GREEN]++;
+//		}
+//		break;
+//	case CHANGE_GREEN:
+//		if(buffer[VER_RED]-1 > 1 && buffer[HOR_GREEN]-1 > 0) {
+//			buffer[VER_GREEN]++;
+//			buffer[VER_RED]--;
+//
+//			buffer[HOR_GREEN]--;
+//			buffer[HOR_RED]++;
+//		}
+//		break;
+//	case CHANGE_YELLOW:
+//		if(buffer[VER_GREEN]-1 > 0) {
+//			buffer[VER_YELLOW]++;
+//			buffer[VER_GREEN]--;
+//		}
+//		break;
+//	default:
+//		break;
+//	}
+//}
 //			RV          GV    YV
 //	|-----------------|------|---|
 //	|------------|----|----------|
 //        GH       YH      RH
-void decrease(ModeState state, uint8_t* buffer) {
-	switch(state) {
-	case CHANGE_RED:
-		if(buffer[VER_RED]-1 > 1 && buffer[VER_GREEN]-1 > 0) {
-			buffer[VER_RED]--;
-			buffer[VER_GREEN]++;
-
-			buffer[HOR_RED]++;
-			buffer[HOR_GREEN]--;
-		}
-		break;
-	case CHANGE_GREEN:
-		if(buffer[VER_GREEN]-1 > 0 && buffer[HOR_RED]-1 > 1) {
-			buffer[VER_GREEN]--;
-			buffer[VER_RED]++;
-
-			buffer[HOR_GREEN]++;
-			buffer[HOR_RED]--;
-		}
-		break;
-	case CHANGE_YELLOW:
-		if(buffer[VER_YELLOW]-1 > 0) {
-			buffer[VER_YELLOW]--;
-			buffer[VER_GREEN]++;
-		}
-		break;
-	default:
-		break;
-	}
-}
-void copyArray(uint8_t* from, uint8_t* to, int n) {
-	for(int i = 0; i < n; i++) {
-		to[i] = from[i];
-	}
-}
+//void decrease(ModeState state, uint8_t* buffer) {
+//	switch(state) {
+//	case CHANGE_RED:
+//		if(buffer[VER_RED]-1 > 1 && buffer[VER_GREEN]-1 > 0) {
+//			buffer[VER_RED]--;
+//			buffer[VER_GREEN]++;
+//
+//			buffer[HOR_RED]++;
+//			buffer[HOR_GREEN]--;
+//		}
+//		break;
+//	case CHANGE_GREEN:
+//		if(buffer[VER_GREEN]-1 > 0 && buffer[HOR_RED]-1 > 1) {
+//			buffer[VER_GREEN]--;
+//			buffer[VER_RED]++;
+//
+//			buffer[HOR_GREEN]++;
+//			buffer[HOR_RED]--;
+//		}
+//		break;
+//	case CHANGE_YELLOW:
+//		if(buffer[VER_YELLOW]-1 > 0) {
+//			buffer[VER_YELLOW]--;
+//			buffer[VER_GREEN]++;
+//		}
+//		break;
+//	default:
+//		break;
+//	}
+//}
+//void copyArray(uint8_t* from, uint8_t* to, int n) {
+//	for(int i = 0; i < n; i++) {
+//		to[i] = from[i];
+//	}
+//}
 /* USER CODE END 4 */
 
 /**

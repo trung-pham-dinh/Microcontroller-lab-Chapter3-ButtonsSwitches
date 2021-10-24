@@ -23,7 +23,8 @@ Core/Src/traffic.o: ../Core/Src/traffic.c ../Core/Inc/traffic.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
- ../Core/Inc/timer.h ../Core/Inc/input_reading.h
+ ../Core/Inc/timer.h ../Core/Inc/input_reading.h \
+ ../Core/Inc/functionality.h
 
 ../Core/Inc/traffic.h:
 
@@ -80,3 +81,5 @@ Core/Src/traffic.o: ../Core/Src/traffic.c ../Core/Inc/traffic.h \
 ../Core/Inc/timer.h:
 
 ../Core/Inc/input_reading.h:
+
+../Core/Inc/functionality.h:

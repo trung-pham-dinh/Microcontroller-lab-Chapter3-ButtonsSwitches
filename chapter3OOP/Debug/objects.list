@@ -1,3 +1,4 @@
+"./Core/Src/functionality.o"
 "./Core/Src/input_processing.o"
 "./Core/Src/input_reading.o"
 "./Core/Src/led7_display.o"

@@ -5,6 +5,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../Core/Src/functionality.c \
 ../Core/Src/input_processing.c \
 ../Core/Src/input_reading.c \
 ../Core/Src/led7_display.c \
@@ -18,6 +19,7 @@ C_SRCS += \
 ../Core/Src/traffic.c 
 
 OBJS += \
+./Core/Src/functionality.o \
 ./Core/Src/input_processing.o \
 ./Core/Src/input_reading.o \
 ./Core/Src/led7_display.o \
@@ -31,6 +33,7 @@ OBJS += \
 ./Core/Src/traffic.o 
 
 C_DEPS += \
+./Core/Src/functionality.d \
 ./Core/Src/input_processing.d \
 ./Core/Src/input_reading.d \
 ./Core/Src/led7_display.d \

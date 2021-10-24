@@ -14,7 +14,7 @@ typedef enum {
 	STATE_RED,
 	STATE_GREEN,
 	STATE_YELLOW,
-	STATE_WAIT,
+	STATE_UPDATE,
 } TrafficState;
 
 // fsm state for display traffic lights(vertical road and horizontal road)
@@ -25,12 +25,11 @@ static const uint16_t* lightPort;
 
 // provided by user: Array of time value for each traffic light
 static uint8_t* lightTime;
+static uint8_t* lightTimeUpdate;
 
 
 static uint16_t allpin; // represent for all traffic lights pin
-static uint8_t readyForNewPeriod = 1; // flag indicate whether fsm is ready to come to first state
-static uint8_t periodDone = 0; // flag to indicate whether fsm reaches the final state
-
+static uint8_t isUpdate = 0;
 
 
 /**
@@ -42,9 +41,10 @@ static uint8_t periodDone = 0; // flag to indicate whether fsm reaches the final
   * @param  time: Array of time value for each traffic light
   * @retval None
   */
-void init_traffic(const uint16_t* port, uint8_t* time) {
+void init_traffic(const uint16_t* port, uint8_t* time, uint8_t* timeUpdate) {
 	lightPort = port;
 	lightTime = time;
+	lightTimeUpdate = timeUpdate;
 
 	ver_state = STATE_YELLOW;
 	hor_state = STATE_RED;
@@ -72,6 +72,7 @@ void traffic_display(void) {
 			clearTraffic();
 			break;
 		}
+
 		HAL_GPIO_WritePin(TRAFFIC_PORT, lightPort[VER_RED], LIGHT_SET);
 		break;
 	case STATE_GREEN:
@@ -86,21 +87,19 @@ void traffic_display(void) {
 		break;
 	case STATE_YELLOW:
 		if(getSecFlag(TRAFFIC_VER_TIMER)) {
-			ver_state = STATE_WAIT;
+			ver_state = STATE_UPDATE;
 
-			readyForNewPeriod = 0;
-			periodDone = 1;
 			clearTraffic();
 			break;
 		}
 		HAL_GPIO_WritePin(TRAFFIC_PORT, lightPort[VER_YELLOW], LIGHT_SET);
 		break;
-	case STATE_WAIT:
-		if(readyForNewPeriod) {
-			periodDone = 0;
-			ver_state = STATE_RED;
-			setSecTimer(TRAFFIC_VER_TIMER, lightTime[VER_RED]);
+	case STATE_UPDATE:
+		if(getUpdateFlag()) {
+			copyArray(lightTimeUpdate, lightTime, 6);
 		}
+		setSecTimer(TRAFFIC_VER_TIMER, lightTime[VER_RED]);
+		ver_state = STATE_RED;
 		break;
 	}
 
@@ -129,21 +128,19 @@ void traffic_display(void) {
 		break;
 	case STATE_RED:
 		if(getSecFlag(TRAFFIC_HOR_TIMER)) {
-			hor_state = STATE_WAIT;
+			hor_state = STATE_UPDATE;
 
-			readyForNewPeriod = 0;
-			periodDone = 1;
 			clearTraffic();
 			break;
 		}
 		HAL_GPIO_WritePin(TRAFFIC_PORT, lightPort[HOR_RED], LIGHT_SET);
 		break;
-	case STATE_WAIT:
-		if(readyForNewPeriod) {
-			periodDone = 0;
-			hor_state = STATE_GREEN;
-			setSecTimer(TRAFFIC_HOR_TIMER, lightTime[HOR_GREEN]);
+	case STATE_UPDATE:
+		if(getUpdateFlag()) {
+			copyArray(lightTimeUpdate, lightTime, 6);
 		}
+		setSecTimer(TRAFFIC_HOR_TIMER, lightTime[HOR_GREEN]);
+		hor_state = STATE_GREEN;
 		break;
 	}
 
@@ -170,18 +167,13 @@ void clearTraffic(void) {
   * @param  None
   * @retval A flag to indicate the period is done
   */
-uint8_t isPeriodDone(void) {
-	return periodDone;
+uint8_t getUpdateFlag(void) {
+	if(isUpdate) {
+		isUpdate = 0;
+		return 1;
+	}
+	return 0;
 }
-
-/**
-  * @brief  To signal the function "void traffic_display(void)" that it can begin a new period
-  *
-  * @note   None
-  *
-  * @param  None
-  * @retval None
-  */
-void startNewPeriod(void) {
-	readyForNewPeriod = 1;
+void updateNextPeriod(void) {
+	isUpdate = 1;
 }
